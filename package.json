@@ -1,0 +1,28 @@
+{
+  "name": "tpa-portal",
+  "version": "1.0.0",
+  "description": "Training Portal Application with React, Node.js, Express, and MySQL",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd backend && node server.js",
+    "client:dev": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "server:start": "cd backend && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "training",
+    "portal",
+    "react",
+    "nodejs",
+    "express",
+    "mysql"
+  ],
+  "author": "TPA Portal Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
