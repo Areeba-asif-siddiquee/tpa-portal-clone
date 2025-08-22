@@ -15,7 +15,18 @@ const getCourses = async (req, res) => {
       sortOrder = 'DESC'
     } = req.query;
 
-    const offset = (page - 1) * limit;
+    // Validate and sanitize sortBy and sortOrder
+    const validSortBy = ['created_at', 'course_name', 'course_code', 'status'];
+    const validSortOrder = ['ASC', 'DESC'];
+
+    const sortBySafe = validSortBy.includes(sortBy) ? sortBy : 'created_at';
+    const sortOrderSafe = validSortOrder.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'DESC';
+
+    // Parse page and limit to integers safely
+    const pageInt = parseInt(page, 10);
+    const limitInt = parseInt(limit, 10);
+    const offset = (pageInt > 0 ? pageInt : 1 - 1) * (limitInt > 0 ? limitInt : 10);
+
     let whereClause = 'WHERE 1=1';
     const queryParams = [];
 
@@ -44,9 +55,8 @@ const getCourses = async (req, res) => {
       queryParams.push(status);
     }
 
-    // Role-based filtering
-    if (req.user.roleName === 'Employee') {
-      // Employees can only see published and active courses
+    // Role-based filtering for Employee role
+    if (req?.user?.roleName === 'Employee') {
       whereClause += ' AND c.status IN ("Published", "Active")';
     }
 
@@ -65,22 +75,20 @@ const getCourses = async (req, res) => {
       LEFT JOIN users instructor ON c.instructor_id = instructor.id
       LEFT JOIN users creator ON c.created_by = creator.id
       ${whereClause}
-      ORDER BY c.${sortBy} ${sortOrder}
+      ORDER BY c.${sortBySafe} ${sortOrderSafe}
       LIMIT ? OFFSET ?
     `;
 
-    queryParams.push(parseInt(limit), parseInt(offset));
+    queryParams.push(limitInt, offset);
 
     const courses = await query(coursesQuery, queryParams);
-
-    // Get total count for pagination
     const countQuery = `
       SELECT COUNT(*) as total
       FROM courses c
       ${whereClause}
     `;
-    
-    const countParams = queryParams.slice(0, -2); // Remove limit and offset
+
+    const countParams = queryParams.slice(0, -2);
     const totalResult = await query(countQuery, countParams);
     const total = totalResult[0].total;
 
@@ -89,10 +97,10 @@ const getCourses = async (req, res) => {
       data: {
         courses,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: pageInt,
+          limit: limitInt,
           total,
-          totalPages: Math.ceil(total / limit)
+          totalPages: Math.ceil(total / limitInt)
         }
       }
     });
@@ -105,6 +113,44 @@ const getCourses = async (req, res) => {
     });
   }
 };
+
+const getAllCourses = async (req, res) => {
+  try {
+    const getCoursesQuery = 'SELECT * FROM courses ORDER BY created_at DESC';
+    const courses = await query(getCoursesQuery);
+    res.status(200).json({
+      success: true,
+      data: {
+        courses,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch all courses'
+    })
+  }
+}
+
+const getCoursesCount = async (req, res) => {
+  try {
+    const countQuery = 'SELECT COUNT(*) as total FROM courses';
+    const result = await query(countQuery);
+    const total = result[0].total;
+
+    res.json({
+      success: true,
+      data: {
+        totalCourses: total
+      }
+    });
+  } catch (error) {
+       res.status(500).json({
+      success: false,
+      message: 'Failed to fetch courses count'
+    })
+  }
+}
 
 // Get single course by ID
 const getCourse = async (req, res) => {
@@ -455,12 +501,209 @@ const getCategories = async (req, res) => {
   }
 };
 
+// Get most enrolled courses for graph
+const getMostEnrolledCourses = async (req, res) => {
+  try {
+    const queryStr = `
+      SELECT c.course_name, COUNT(ce.user_id) as enrolled_count
+      FROM courses c
+      LEFT JOIN course_enrollments ce ON ce.course_id = c.id
+      GROUP BY c.id
+      ORDER BY enrolled_count DESC
+      LIMIT 10
+    `;
+    const results = await query(queryStr);
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error('Most enrolled courses error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch most enrolled courses'
+    });
+  }
+};
+
+// Get course enrollment trends over time
+const getEnrollmentTrends = async (req, res) => {
+  try {
+    const { period = 'month', limit = 12 } = req.query;
+    
+    let dateFormat, groupBy;
+    switch (period) {
+      case 'week':
+        dateFormat = '%Y-Week %u';
+        groupBy = 'YEARWEEK(ce.enrollment_date)';
+        break;
+      case 'month':
+        dateFormat = '%Y-%m';
+        groupBy = 'DATE_FORMAT(ce.enrollment_date, "%Y-%m")';
+        break;
+      case 'quarter':
+        dateFormat = '%Y-Q%q';
+        groupBy = 'CONCAT(YEAR(ce.enrollment_date), "-Q", QUARTER(ce.enrollment_date))';
+        break;
+      default:
+        dateFormat = '%Y-%m';
+        groupBy = 'DATE_FORMAT(ce.enrollment_date, "%Y-%m")';
+    }
+
+    const trendsQuery = `
+      SELECT 
+        ${groupBy} as period,
+        DATE_FORMAT(ce.enrollment_date, '${dateFormat}') as period_label,
+        COUNT(ce.id) as enrollments,
+        COUNT(CASE WHEN ce.completion_status = 'Completed' THEN 1 END) as completions,
+        AVG(ce.progress_percentage) as avg_progress
+      FROM course_enrollments ce
+      WHERE ce.enrollment_date >= DATE_SUB(NOW(), INTERVAL ${parseInt(limit)} ${period.toUpperCase()})
+      GROUP BY ${groupBy}
+      ORDER BY period DESC
+      LIMIT ?
+    `;
+
+    const trends = await query(trendsQuery, [parseInt(limit)]);
+    
+    res.json({
+      success: true,
+      data: trends.reverse() // Reverse to get chronological order
+    });
+  } catch (error) {
+    console.error('Get enrollment trends error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch enrollment trends'
+    });
+  }
+};
+
+// Get department-wise course statistics
+const getDepartmentStats = async (req, res) => {
+  try {
+    const statsQuery = `
+      SELECT 
+        d.department_name,
+        COUNT(DISTINCT c.id) as total_courses,
+        COUNT(ce.id) as total_enrollments,
+        COUNT(CASE WHEN ce.completion_status = 'Completed' THEN 1 END) as completions,
+        AVG(ce.progress_percentage) as avg_progress,
+        COUNT(CASE WHEN c.status = 'Active' THEN 1 END) as active_courses
+      FROM departments d
+      LEFT JOIN courses c ON d.id = c.department_id
+      LEFT JOIN course_enrollments ce ON c.id = ce.course_id
+      GROUP BY d.id, d.department_name
+      ORDER BY total_enrollments DESC
+    `;
+
+    const stats = await query(statsQuery);
+    
+    // stats = stats.map(stat => ({
+    //   ...stat,
+    //   completed: stat.completions
+    // }));
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Get department stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch department statistics'
+    });
+  }
+};
+
+// Get course completion rates by difficulty level
+const getCompletionRatesByDifficulty = async (req, res) => {
+  try {
+    const ratesQuery = `
+      SELECT 
+        c.difficulty_level,
+        COUNT(ce.id) as total_enrollments,
+        COUNT(CASE WHEN ce.completion_status = 'Completed' THEN 1 END) as completions,
+        ROUND(
+          (COUNT(CASE WHEN ce.completion_status = 'Completed' THEN 1 END) / COUNT(ce.id)) * 100, 2
+        ) as completion_rate
+      FROM courses c
+      LEFT JOIN course_enrollments ce ON c.id = ce.course_id
+      WHERE ce.id IS NOT NULL
+      GROUP BY c.difficulty_level
+      ORDER BY completion_rate DESC
+    `;
+
+    const rates = await query(ratesQuery);
+    
+    // rates = rates.map(rate => ({
+    //   ...rate,
+    //   completed: rate.completions
+    // }));
+
+    res.json({
+      success: true,
+      data: rates
+    });
+  } catch (error) {
+    console.error('Get completion rates error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch completion rates'
+    });
+  }
+};
+
+// Get monthly enrollment vs completion trends
+const getMonthlyTrends = async (req, res) => {
+  try {
+    const trendsQuery = `
+      SELECT 
+        DATE_FORMAT(ce.enrollment_date, '%Y-%m') as month,
+        DATE_FORMAT(ce.enrollment_date, '%M %Y') as month_label,
+        COUNT(ce.id) as enrollments,
+        COUNT(CASE WHEN ce.completion_status = 'Completed' THEN 1 END) as completions,
+        COUNT(CASE WHEN ce.completion_status = 'In Progress' THEN 1 END) as in_progress,
+        AVG(ce.progress_percentage) as avg_progress
+      FROM course_enrollments ce
+      WHERE ce.enrollment_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+      GROUP BY DATE_FORMAT(ce.enrollment_date, '%Y-%m')
+      ORDER BY month ASC
+    `;
+
+    const trends = await query(trendsQuery);
+    
+    res.json({
+      success: true,
+      data: trends
+    });
+  } catch (error) {
+    console.error('Get monthly trends error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch monthly trends'
+    });
+  }
+};
+
+
 module.exports = {
   getCourses,
+  getAllCourses,
   getCourse,
   createCourse,
   enrollCourse,
   getUserEnrollments,
   updateProgress,
-  getCategories
+  getCategories,
+  getCoursesCount,
+  getMostEnrolledCourses,
+  getEnrollmentTrends,
+  getDepartmentStats,
+  getCompletionRatesByDifficulty,
+  getMonthlyTrends
 };
+
+
+

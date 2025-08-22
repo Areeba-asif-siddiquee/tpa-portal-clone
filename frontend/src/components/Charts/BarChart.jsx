@@ -1,51 +1,61 @@
-import React from 'react'
-import {
-  BarChart as RechartsBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from 'recharts'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import ReactApexChart from 'react-apexcharts';   // you forgot this import
 
-const BarChart = ({ 
-  data, 
-  dataKey, 
-  xAxisKey = 'name',
-  color = '#3B82F6',
-  height = 300,
-  showGrid = true,
-  showTooltip = true,
-  showLegend = false,
-  bars = [],
-  ...props 
-}) => {
+const ApexChart = () => {
+  const [state, setState] = React.useState({
+    series: [
+      {
+        name: "Desktops",
+        data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+      }
+    ],
+    options: {
+      chart: {
+        height: 350,
+        type: 'line',
+        zoom: {
+          enabled: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'straight'
+      },
+      title: {
+        text: 'Product Trends by Month',
+        align: 'left'
+      },
+      grid: {
+        row: {
+          colors: ['#f3f3f3', 'transparent'],
+          opacity: 0.5
+        }
+      },
+      xaxis: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
+      }
+    }
+  });
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart data={data} {...props}>
-        {showGrid && <CartesianGrid strokeDasharray="3 3" />}
-        <XAxis dataKey={xAxisKey} />
-        <YAxis />
-        {showTooltip && <Tooltip />}
-        {showLegend && <Legend />}
-        
-        {bars.length > 0 ? (
-          bars.map((bar, index) => (
-            <Bar
-              key={index}
-              dataKey={bar.dataKey}
-              fill={bar.color || color}
-              name={bar.name || bar.dataKey}
-            />
-          ))
-        ) : (
-          <Bar dataKey={dataKey} fill={color} />
-        )}
-      </RechartsBarChart>
-    </ResponsiveContainer>
-  )
-}
+    <div>
+      <div id="chart">
+        <ReactApexChart 
+          options={state.options} 
+          series={state.series} 
+          type="line" 
+          height={350} 
+        />
+      </div>
+      <div id="html-dist"></div>
+    </div>
+  );
+};
 
-export default BarChart
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<ApexChart />);
+
+export default ApexChart;

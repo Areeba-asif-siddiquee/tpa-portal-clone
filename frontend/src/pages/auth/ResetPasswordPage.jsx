@@ -70,7 +70,7 @@ const ResetPasswordPage = () => {
             {/* New Password */}
             <div>
               <label htmlFor="password" className="form-label">
-                New Password
+                New Password 
               </label>
               <div className="relative">
                 <input

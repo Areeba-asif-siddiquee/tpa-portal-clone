@@ -22,21 +22,44 @@ const SurveysPage = () => {
   const [selectedType, setSelectedType] = useState('all')
 
   // Fetch surveys
-  const { data: surveysData, isLoading } = useQuery(
-    ['surveys', selectedStatus, selectedType],
-    async () => {
-      let url = '/surveys'
-      const params = new URLSearchParams()
-      
-      if (selectedStatus !== 'all') params.append('status', selectedStatus)
-      if (selectedType !== 'all') params.append('type', selectedType)
-      
-      if (params.toString()) url += `?${params.toString()}`
-      
-      const response = await api.get(url)
-      return response.data
+  const [surveys, setSurveys] = useState([
+    {
+      id: 1,
+      title: 'Training Effectiveness Survey',
+      description: 'Evaluate the effectiveness of recent training programs',
+      status: 'active',
+      type: 'feedback',
+      responses: 45,
+      totalTargets: 100,
+      createdDate: '2025-01-15',
+      endDate: '2025-02-15',
+      creator: 'Admin User'
+    },
+    {
+      id: 2,
+      title: 'Workplace Safety Assessment',
+      description: 'Monthly safety compliance and awareness survey',
+      status: 'draft',
+      type: 'assessment',
+      responses: 0,
+      totalTargets: 150,
+      createdDate: '2025-01-18',
+      endDate: '2025-02-28',
+      creator: 'Safety Manager'
+    },
+    {
+      id: 3,
+      title: 'Employee Satisfaction Survey',
+      description: 'Quarterly employee satisfaction and engagement survey',
+      status: 'completed',
+      type: 'feedback',
+      responses: 89,
+      totalTargets: 89,
+      createdDate: '2024-12-01',
+      endDate: '2024-12-31',
+      creator: 'HR Manager'
     }
-  )
+  ]);
 
   // Fetch user's survey responses
   const { data: responsesData } = useQuery(
@@ -54,7 +77,7 @@ const SurveysPage = () => {
     return <LoadingSpinner text="Loading surveys..." />
   }
 
-  const surveys = surveysData?.data?.surveys || []
+  // const surveys = surveysData?.data?.surveys || []
   const userResponses = responsesData?.data?.responses || []
 
   // Get response status for a survey

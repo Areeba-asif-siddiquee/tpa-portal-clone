@@ -35,8 +35,8 @@ const MainLayout = ({ children }) => {
     const baseItems = [
       { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: location.pathname === '/dashboard' },
       { name: 'Courses', href: '/courses', icon: BookOpenIcon, current: location.pathname.startsWith('/courses') },
-      { name: 'Surveys', href: '/surveys', icon: ClipboardDocumentListIcon, current: location.pathname.startsWith('/surveys') },
-      { name: 'Training', href: '/training', icon: AcademicCapIcon, current: location.pathname.startsWith('/training') },
+      // { name: 'Surveys', href: '/surveys', icon: ClipboardDocumentListIcon, current: location.pathname.startsWith('/surveys') },
+      // { name: 'Training', href: '/training', icon: AcademicCapIcon, current: location.pathname.startsWith('/training') },
     ]
 
     if (user?.roleName === 'Manager' || user?.roleName === 'Admin' || user?.roleName === 'SystemAdmin') {

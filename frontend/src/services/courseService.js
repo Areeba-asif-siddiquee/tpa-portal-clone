@@ -1,15 +1,31 @@
-// import api from './authService'
+import axios from 'axios'
+
+export const api = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+// Add token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const courseService = {
   // Get all courses with filtering and pagination
   async getCourses(params = {}) {
-    const response = await api.get('/courses', { params })
+    const response = await axios.get('http://localhost:5000/api/courses', { params })
     return response.data
   },
 
   // Alias for getCourses to match CourseManagement expectations
   async getAllCourses(params = {}) {
-    const response = await api.get('/courses', { params })
+    const response = await axios.get('/courses', { params })
     return {
       data: response.data.data?.courses || response.data.courses || response.data,
       pagination: response.data.data?.pagination || response.data.pagination
@@ -88,5 +104,31 @@ export const courseService = {
       responseType: 'blob'
     })
     return response
+  },
+
+  // Analytics functions
+  async getMostEnrolledCourses() {
+    const response = await api.get('/courses/analytics/most-enrolled');
+    return response.data;
+  },
+
+  async getEnrollmentTrends(period = 'month', limit = 12) {
+    const response = await api.get(`/courses/analytics/enrollment-trends?period=${period}&limit=${limit}`);
+    return response.data;
+  },
+
+  async getDepartmentStats() {
+    const response = await api.get('/courses/analytics/department-stats');
+    return response.data;
+  },
+
+  async getCompletionRatesByDifficulty() {
+    const response = await api.get('/courses/analytics/completion-rates');
+    return response.data;
+  },
+
+  async getMonthlyTrends() {
+    const response = await api.get('/courses/analytics/monthly-trends');
+    return response.data;
   }
 }

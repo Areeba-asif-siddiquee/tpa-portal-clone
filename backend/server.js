@@ -5,16 +5,17 @@ const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const bodyParser = require('body-parser')
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+app.use(bodyParser.json());
+const PORT = process.env.PORT || 5000;
 
 // Database connection
 const db = require('./config/database');
-// new change demo
 // Middleware
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -52,6 +53,8 @@ app.use('/api/training', require('./routes/training'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/admin', require('./routes/admin'));
+// app.use('/requests', require('./pages/newform'))
+// app.use('/api/pages', require('./src/pages'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -61,6 +64,7 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });
+
 
 // Global error handler
 app.use((err, req, res, next) => {

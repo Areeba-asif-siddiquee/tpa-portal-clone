@@ -14,10 +14,11 @@ const ForgotPasswordPage = () => {
     formState: { errors }
   } = useForm()
 
+  //submit handlers
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      const response = await authService.forgotPassword(data.email)
+      const response = await authService.forgotPassword(data.email)  // backend api call krne k liye 
       if (response.success) {
         setEmailSent(true)
         toast.success('Password reset email sent!')

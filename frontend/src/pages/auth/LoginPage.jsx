@@ -17,7 +17,7 @@ const LoginPage = () => {
       const result = await login(data)
       if (result.success) {
         toast.success(`Welcome back, ${result.user.firstName}!`)
-        navigate('/dashboard')
+        result.user.roleId === 4 ? navigate('/admin') : navigate('/dashboard')
       } else {
         toast.error(result.error || 'Login failed')
       }
@@ -107,7 +107,6 @@ const LoginPage = () => {
                 <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
               )}
             </div>
-
             {/* Forgot Password Link */}
             <div className="flex items-center justify-between">
               <div className="text-sm">

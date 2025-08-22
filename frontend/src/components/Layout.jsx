@@ -25,10 +25,10 @@ const Layout = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
     { name: 'Courses', href: '/courses', icon: BookOpenIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
     { name: 'Surveys', href: '/surveys', icon: ClipboardDocumentListIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
-    { name: 'Training', href: '/training', icon: AcademicCapIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
+    { name: 'Training', href: '/training-sectors', icon: AcademicCapIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
     { name: 'Reports', href: '/reports', icon: ChartBarIcon, roles: ['Manager', 'Admin', 'SystemAdmin'] },
     { name: 'Support', href: '/support', icon: QuestionMarkCircleIcon, roles: ['Employee', 'Manager', 'Admin', 'SystemAdmin'] },
-    { name: 'Admin', href: '/admin', icon: Cog6ToothIcon, roles: ['Admin', 'SystemAdmin'] },
+    // { name: 'Admin', href: '/admin', icon: Cog6ToothIcon, roles: ['Admin', 'SystemAdmin'] },
   ]
 
   const filteredNavigation = navigation.filter(item => 
@@ -140,12 +140,12 @@ const Layout = ({ children }) => {
             <div className="relative flex flex-1"></div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {/* Notifications */}
-              <button
+              {/* <button
                 type="button"
                 className="-m-2.5 p-2.5 text-secondary-400 hover:text-secondary-500"
               >
                 <BellIcon className="h-6 w-6" />
-              </button>
+              </button> */}
 
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-secondary-200" />
 

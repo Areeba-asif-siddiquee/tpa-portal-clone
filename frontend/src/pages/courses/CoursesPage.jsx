@@ -97,9 +97,9 @@ const CoursesPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-secondary-900">Courses</h1>
+          <h1 className="text-2xl font-bold text-secondary-900">Total Courses</h1>
           <p className="mt-1 text-sm text-secondary-600">
-            Explore and enroll in training courses
+            Explore our wide range of courses designed to enhance your skills and knowledge.
           </p>
         </div>
         {hasRole(['Admin', 'SystemAdmin', 'Manager']) && (
@@ -114,10 +114,9 @@ const CoursesPage = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="md:col-span-2">
+      {/* <div className="bg-white shadow rounded-lg p-6"> */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+          {/* <div className="md:col-span-2">
             <div className="relative">
               <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400" />
               <input
@@ -128,10 +127,10 @@ const CoursesPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Status Filter */}
-          <div>
+          {/* <div>
             <select
               className="form-input"
               value={statusFilter}
@@ -143,10 +142,10 @@ const CoursesPage = () => {
               <option value="Draft">Draft</option>
               <option value="Completed">Completed</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Sort */}
-          <div>
+          {/* <div>
             <select
               className="form-input"
               value={`${sortBy}-${sortOrder}`}
@@ -163,10 +162,10 @@ const CoursesPage = () => {
               <option value="duration_hours-ASC">Shortest First</option>
               <option value="duration_hours-DESC">Longest First</option>
             </select>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
 
-        {(searchTerm || statusFilter || departmentFilter || domainFilter) && (
+        {/* {(searchTerm || statusFilter || departmentFilter || domainFilter) && (
           <div className="mt-4 flex items-center justify-between">
             <p className="text-sm text-secondary-600">
               {pagination.total || 0} courses found
@@ -178,8 +177,8 @@ const CoursesPage = () => {
               Clear filters
             </button>
           </div>
-        )}
-      </div>
+        )} */}
+      {/* </div> */}
 
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -264,7 +263,7 @@ const CoursesPage = () => {
           <div className="text-center">
             <BookOpenIcon className="mx-auto h-12 w-12 text-secondary-400" />
             <h3 className="mt-2 text-sm font-medium text-secondary-900">
-              {searchTerm || statusFilter ? 'No courses found' : 'No courses available'}
+              {searchTerm || statusFilter ? 'No courses found' : 'No courses available'} 
             </h3>
             <p className="mt-1 text-sm text-secondary-500">
               {searchTerm || statusFilter

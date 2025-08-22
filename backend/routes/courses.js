@@ -7,7 +7,14 @@ const {
   enrollCourse,
   getUserEnrollments,
   updateProgress,
-  getCategories
+  getCategories,
+  getAllCourses,
+  getCoursesCount,
+  getMostEnrolledCourses,
+  getEnrollmentTrends,
+  getDepartmentStats,
+  getCompletionRatesByDifficulty,
+  getMonthlyTrends
 } = require('../controllers/coursesController');
 const { verifyToken, requireRole, optionalAuth } = require('../middleware/auth');
 
@@ -30,7 +37,10 @@ const courseValidation = [
 ];
 
 // Public routes (with optional authentication)
-router.get('/', optionalAuth, getCourses);
+// router.get('/', optionalAuth, getCourses);
+router.get('/', optionalAuth, getAllCourses);
+router.get('/count', optionalAuth, getCoursesCount);
+// router.get('/', optionalAuth, temp);
 router.get('/categories', getCategories);
 
 // Protected routes - User-specific routes (must come before /:id routes)
@@ -40,6 +50,12 @@ router.get('/my-enrollments', verifyToken, getUserEnrollments);
 router.get('/:id', optionalAuth, getCourse);
 router.post('/:id/enroll', verifyToken, enrollCourse);
 router.put('/:id/progress', verifyToken, updateProgress);
+// Analytics routes (accessible to all authenticated users)
+router.get('/analytics/most-enrolled', verifyToken, getMostEnrolledCourses);
+router.get('/analytics/enrollment-trends', verifyToken, getEnrollmentTrends);
+router.get('/analytics/department-stats', verifyToken, getDepartmentStats);
+router.get('/analytics/completion-rates', verifyToken, getCompletionRatesByDifficulty);
+router.get('/analytics/monthly-trends', verifyToken, getMonthlyTrends);
 
 // Admin/Manager only routes
 router.post('/', verifyToken, requireRole(['Admin', 'SystemAdmin', 'Manager']), courseValidation, createCourse);

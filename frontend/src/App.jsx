@@ -5,25 +5,28 @@ import Layout from './components/Layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import { AuthProvider} from './contexts/AuthContext'
 import LoginPage from './pages/auth/LoginPage'
-import AdminDashboard from './pages/admin/AdminDashboard'
+// import AdminDashboard from './pages/admin/AdminDashboard'
 import EmployeeDashboard from './pages/EmployeeDashboard'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import DashboardPage from './pages/DashboardPage'
 import CoursesPage from './pages/courses/CoursesPage'
-import CourseDetailPage from './pages/courses/CourseDetailPage'
+// import CourseDetailPage from './pages/courses/CourseDetailPage'
 import SurveysPage from './pages/surveys/SurveysPage'
 import SurveyManagement from './pages/SurveyManagement'
-import TrainingPage from './pages/training/TrainingPage'
+// import TrainingPage from './pages/training/TrainingPage'
 import TrainingSectors from './pages/TrainingSectors'
-import ReportsPage from './pages/reports/ReportsPage'
+// import ReportsPage from './pages/reports/ReportsPage'
 import ReportingDashboard from './pages/ReportingDashboard'
-import SupportPage from './pages/support/SupportPage'
+// import GraphsDashboard from './pages/GraphsDashboard'
+// import SupportPage from './pages/support/SupportPage'
 import SupportSystem from './pages/SupportSystem'
 import ProfilePage from './pages/ProfilePage'
-import UserManagement from './pages/admin/UserManagement'
-import CourseManagement from './pages/CourseManagement'
+// import UserManagement from './pages/admin/UserManagement'
+// import CourseManagement from './pages/CourseManagement'
+import AddNewCourse from './pages/admin/addNewCourse'
+import FillNewForm from './pages/courses/FillNewForm'
 
 const PrivateRoute = ({children, role}) => {
   const { isAuthenticated, user } = useAuth()
@@ -31,7 +34,6 @@ const PrivateRoute = ({children, role}) => {
   if (role && user.role !== role) return <Navigate to="/" />
   return children
 }
-
 
 
 // Protected Route Component
@@ -123,14 +125,14 @@ function AppContent() {
       />
 
       {/* Role-Specific Dashboards (from your first App) */}
-      <Route
+      {/* <Route
         path="/admin-dashboard"
         element={
           <PrivateRoute role="admin">
             <AdminDashboard />
           </PrivateRoute>
         }
-      />
+      /> */}
       <Route
         path="/employee-dashboard"
         element={
@@ -155,18 +157,21 @@ function AppContent() {
           <ProtectedRoute>
             <Layout>
               <Routes>
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<EmployeeDashboard />} />
                 <Route path="/profile" element={<ProfilePage />} />
 
                 {/* Courses */}
                 <Route path="/courses" element={<CoursesPage />} />
-                <Route path="/courses/:id" element={<CourseDetailPage />} />
+                {/* <Route path="/courses/:id" element={<CourseDetailPage />} /> */}
+                <Route path="/courses/new" element={<AddNewCourse />} />
+                <Route path="/courses/fill-new" element={<FillNewForm />} />
+
 
                 {/* Surveys */}
                 <Route path="/surveys" element={<SurveysPage />} />
 
                 {/* Training */}
-                <Route path="/training" element={<TrainingPage />} />
+                {/* <Route path="/training" element={<TrainingPage />} /> */}
                 <Route path="/training-sectors" element={<TrainingSectors />} />
 
                 {/* Reports & Analytics */}
@@ -174,18 +179,26 @@ function AppContent() {
                   path="/reports"
                   element={
                     <ProtectedRoute requiredRoles={['Manager', 'Admin', 'SystemAdmin']}>
-                      <ReportsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <ProtectedRoute requiredRoles={['Manager', 'Admin', 'SystemAdmin']}>
                       <ReportingDashboard />
                     </ProtectedRoute>
                   }
                 />
+                {/* <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <GraphsDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/graphs"
+                  element={
+                    <ProtectedRoute requiredRoles={['Manager', 'Admin', 'SystemAdmin']}>
+                      <GraphsDashboard />
+                    </ProtectedRoute>
+                  }
+                /> */}
 
                 {/* Support */}
                 <Route path="/support" element={<SupportSystem />} />
@@ -196,10 +209,12 @@ function AppContent() {
                   element={
                     <ProtectedRoute requiredRoles={['Admin', 'SystemAdmin']}>
                       <Routes>
-                        <Route path="/" element={<AdminDashboard />} />
-                        <Route path="/users" element={<UserManagement />} />
-                        <Route path="/courses" element={<CourseManagement />} />
+                        <Route path="/" element={<DashboardPage />} />
+                        {/* <Route path="/users" element={<UserManagement />} /> */}
+                        {/* <Route path="/courses" element={<CourseManagement />} /> */}
                         <Route path="/surveys" element={<SurveyManagement />} />
+                        <Route path="/courses/new" element={<AddNewCourse />} />
+                        <Route path="/courses/fill-new" element={<FillNewForm />} />
                       </Routes>
                     </ProtectedRoute>
                   }
@@ -207,7 +222,7 @@ function AppContent() {
 
                 {/* Default Redirects */}
                 <Route path="/" element={<Navigate to="/dashboard" />} />
-
+                 
                 <Route
                   path="/unauthorized"
                   element={

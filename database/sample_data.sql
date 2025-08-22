@@ -163,4 +163,6 @@ INSERT INTO notifications (user_id, title, message, type, action_url) VALUES
 (11, 'Training Reminder', 'Your Industrial Gas Safety Fundamentals course starts tomorrow', 'Info', '/courses/1'),
 (12, 'Course Update', 'CNG Operations and Maintenance course schedule has been updated', 'Warning', '/courses/2');
 
+select * from courses;
+
 COMMIT;
